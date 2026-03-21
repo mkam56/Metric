@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PostProcessingManager } from './PostProcessingManager';
+import { PostProcessingManager, type PostProcessingOptions } from './PostProcessingManager';
 
 export class Renderer {
   readonly scene: THREE.Scene;
@@ -10,7 +10,7 @@ export class Renderer {
     this.scene = new THREE.Scene();
     this.webGLRenderer = new THREE.WebGLRenderer({ canvas, antialias: false });
     this.webGLRenderer.setSize(window.innerWidth, window.innerHeight);
-    this.webGLRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.webGLRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     // ACES filmic — applied on composer’s final blit to screen.
     this.webGLRenderer.toneMapping       = THREE.ACESFilmicToneMapping;
     this.webGLRenderer.toneMappingExposure = 1.2;
@@ -26,8 +26,8 @@ export class Renderer {
     return this.webGLRenderer;
   }
 
-  initPostProcessing(camera: THREE.Camera): void {
-    this.postFX = new PostProcessingManager(this.webGLRenderer, this.scene, camera);
+  initPostProcessing(camera: THREE.Camera, options?: PostProcessingOptions): void {
+    this.postFX = new PostProcessingManager(this.webGLRenderer, this.scene, camera, options);
   }
 
   addObject(object: THREE.Object3D): void {
