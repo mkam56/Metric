@@ -2,7 +2,7 @@ import { Renderer }          from '../rendering/Renderer';
 import { SceneManager }      from './SceneManager';
 import { TimeController }    from './TimeController';
 import { CameraController }  from './CameraController';
-import { BlackHoleScene }    from '../scenes/BlackHoleScene';
+import { KerrBlackHoleScene }    from '../scenes/KerrBlackHoleScene';
 
 export class Engine {
   private renderer:        Renderer;
@@ -22,7 +22,7 @@ export class Engine {
     this.sceneManager     = new SceneManager(this.renderer);
     this.timeController   = new TimeController();
 
-    const scene = new BlackHoleScene();
+    const scene = new KerrBlackHoleScene();
     // Link camera before setScene() so it's available inside init().
     scene.linkCamera(this.cameraController.camera);
     this.sceneManager.setScene(scene);
