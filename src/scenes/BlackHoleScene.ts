@@ -36,10 +36,10 @@ export class BlackHoleScene extends BaseScene {
       rs:        this.blackHole.schwarzschildRadius,
       diskInner: this.disk.innerRadius,
       diskOuter: this.disk.outerRadius,
-      diskH0:    0.35,
-      diskFlare: 0.15,
+      diskH0:    0.72,
+      diskFlare: 0.10,
       diskOpacity: 0.9,
-      diskVolSteps: 12.0,
+      diskVolSteps: 18.0,
       tempScale: this.disk.tempScale,
     });
 
