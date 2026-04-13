@@ -74,7 +74,7 @@ export class PostProcessingManager {
 
      // Bloom: slightly raised threshold so only disk core and photon ring glow.
      // NORMALIZED: reduced strength (1.0 instead of 1.4) to match softer Doppler in shader
-     this.bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.0, 0.9, 0.18);
+     this.bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.12, 0.82, 0.22);
     this.composer.addPass(this.bloomPass);
 
     // Anamorphic horizontal streak pass (runs after bloom).
