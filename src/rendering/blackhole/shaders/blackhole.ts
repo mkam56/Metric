@@ -251,20 +251,23 @@ void main() {
             float cosA    = -dot(tangent, toObs);
             float v       = clamp(sqrt(uMass / max(1e-4, rp - uRs)), 0.0, 0.999);
             float gamma   = 1.0 / sqrt(max(1e-5, 1.0 - v * v));
-            float grav    = sqrt(max(0.0, 1.0 - uRs / rp));
-            float doppler = 1.0 / max(1e-4, gamma * (1.0 - v * cosA));
-            float g       = grav * doppler;
-            float g3      = g * g * g;
+             float grav    = sqrt(max(0.0, 1.0 - uRs / rp));
+             float doppler = 1.0 / max(1e-4, gamma * (1.0 - v * cosA));
+             float g       = grav * doppler;
+             // NORMALIZED: replace aggressive g^3 with softer power (g^1.2) to reduce Doppler overheat
+             float g_smooth = pow(clamp(g, 0.0, 2.0), 1.2);
 
-            float sqF     = sqrt(uDiskInner / rp);
-            float tempRaw = pow(rp, -0.75) * pow(max(1e-4, 1.0 - sqF), 0.25);
-            float temp    = clamp(tempRaw / uTempScale, 0.0, 1.0);
+             float sqF     = sqrt(uDiskInner / rp);
+             float tempRaw = pow(rp, -0.75) * pow(max(1e-4, 1.0 - sqF), 0.25);
+             float temp    = clamp(tempRaw / uTempScale, 0.0, 1.0);
 
-            float mu    = clamp(abs(dot(vec3(0.0, 1.0, 0.0), -segDir)), 0.0, 1.0);
-            float limb  = mix(0.35, 1.0, pow(mu, 0.7));
-            vec3 col    = blackbody(clamp(temp * clamp(g * 0.6, 0.0, 1.0), 0.0, 1.0));
+             float mu    = clamp(abs(dot(vec3(0.0, 1.0, 0.0), -segDir)), 0.0, 1.0);
+             float limb  = mix(0.35, 1.0, pow(mu, 0.7));
+             // NORMALIZED: reduce Doppler influence on color temp (0.3 instead of 0.6) for balanced whitening
+             vec3 col    = blackbody(clamp(temp * clamp(g * 0.3, 0.0, 1.0), 0.0, 1.0));
 
-            float emission = j * g3 * limb * 6.0;
+             // NORMALIZED: reduce emission multiplier (3.5 instead of 6.0) and use g_smooth instead of g^3
+             float emission = j * g_smooth * limb * 3.5;
             float absorb   = max(kappa, 0.0);
 
             accum += col * emission * transmittance * ds;

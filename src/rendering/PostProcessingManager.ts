@@ -72,8 +72,9 @@ export class PostProcessingManager {
     this.composer = new EffectComposer(renderer, rt);
     this.composer.addPass(new RenderPass(scene, camera));
 
-    // Bloom: slightly raised threshold so only disk core and photon ring glow.
-    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.4, 0.9, 0.18);
+     // Bloom: slightly raised threshold so only disk core and photon ring glow.
+     // NORMALIZED: reduced strength (1.0 instead of 1.4) to match softer Doppler in shader
+     this.bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.0, 0.9, 0.18);
     this.composer.addPass(this.bloomPass);
 
     // Anamorphic horizontal streak pass (runs after bloom).
