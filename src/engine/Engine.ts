@@ -23,7 +23,6 @@ export class Engine {
     this.timeController   = new TimeController();
 
     const scene = new BlackHoleScene();
-    // Link camera before setScene() so it's available inside init().
     scene.linkCamera(this.cameraController.camera);
     this.sceneManager.setScene(scene);
 
