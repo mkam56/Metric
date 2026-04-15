@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { vertexShader, fragmentShader } from './shaders/blackhole';
 
-// All uniforms are updated externally by BlackHoleScene each frame.
+// All uniforms are updated externally by BlackHoleScene each frame
 export interface BlackHoleUniforms {
   [key: string]: THREE.IUniform;
   uCameraPos:   { value: THREE.Vector3 };
@@ -20,7 +20,6 @@ export interface BlackHoleUniforms {
 }
 
 export class BlackHoleMaterial extends THREE.ShaderMaterial {
-  // Typed reference to the inherited uniforms map.
   readonly bhUniforms: BlackHoleUniforms;
 
   constructor(params: {
@@ -60,7 +59,6 @@ export class BlackHoleMaterial extends THREE.ShaderMaterial {
     this.bhUniforms = uniforms;
   }
 
-  // Called each frame from BlackHoleScene.update()
   updateCamera(camera: THREE.Camera): void {
     this.bhUniforms.uCameraPos.value.copy(camera.position);
     this.bhUniforms.uViewMatInv.value.copy(camera.matrixWorld);
