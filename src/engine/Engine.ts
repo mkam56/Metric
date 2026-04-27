@@ -3,6 +3,7 @@ import { SceneManager }      from './SceneManager';
 import { TimeController }    from './TimeController';
 import { CameraController }  from './CameraController';
 import { BlackHoleScene }    from '../scenes/BlackHoleScene';
+import { NeutronStarScene }  from '../scenes/NeutronStarScene';
 
 export class Engine {
   private renderer:        Renderer;
@@ -22,7 +23,10 @@ export class Engine {
     this.sceneManager     = new SceneManager(this.renderer);
     this.timeController   = new TimeController();
 
-    const scene = new BlackHoleScene();
+    const sceneParam = new URLSearchParams(window.location.search).get('scene');
+    const scene = sceneParam === 'neutron-star'
+      ? new NeutronStarScene()
+      : new BlackHoleScene();
     scene.linkCamera(this.cameraController.camera);
     this.sceneManager.setScene(scene);
 
