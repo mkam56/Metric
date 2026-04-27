@@ -6,6 +6,7 @@ import { BlackHoleScene }    from '../scenes/BlackHoleScene';
 import { QuasarScene }       from '../scenes/QuasarScene';
 import { PulsarScene }       from '../scenes/PulsarScene';
 import { KerrBlackHoleScene } from '../scenes/KerrBlackHoleScene';
+import { NeutronStarScene }  from '../scenes/NeutronStarScene';
 import { BaseScene }         from '../scenes/BaseScene';
 
 export class Engine {
@@ -106,6 +107,9 @@ export class Engine {
     }
     if (sceneName === 'kerr') {
       return new KerrBlackHoleScene();
+    }
+    if (sceneName === 'neutron_star' || sceneName === 'neutron-star') {
+      return new NeutronStarScene();
     }
     return new BlackHoleScene();
   }
