@@ -3,6 +3,7 @@ import { SceneManager }      from './SceneManager';
 import { TimeController }    from './TimeController';
 import { CameraController }  from './CameraController';
 import { BlackHoleScene }    from '../scenes/BlackHoleScene';
+import { QuasarScene }       from '../scenes/QuasarScene';  
 import { PulsarScene }       from '../scenes/PulsarScene';
 import { BaseScene }         from '../scenes/BaseScene';
 
@@ -25,6 +26,7 @@ export class Engine {
     this.timeController   = new TimeController();
 
     const scene = this.createInitialScene();
+    // Link camera before setScene() so it's available inside init().
     if ('linkCamera' in scene && typeof scene.linkCamera === 'function') {
       // Link camera before setScene() so it's available inside init().
       scene.linkCamera(this.cameraController.camera);
@@ -95,6 +97,8 @@ export class Engine {
 
   private createInitialScene(): BaseScene {
     const sceneName = new URLSearchParams(window.location.search).get('scene');
+    if (sceneName === 'quasar') {
+      return new QuasarScene();
     if (sceneName === 'pulsar') {
       return new PulsarScene();
     }
