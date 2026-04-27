@@ -4,7 +4,6 @@ import { RenderPass }      from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass }      from 'three/addons/postprocessing/ShaderPass.js';
 
-// Horizontal anamorphic lens streak — weighted box blur on bright pixels only.
 const AnamorphicFlareMaterial = {
   uniforms: {
     tDiffuse:   { value: null as THREE.Texture | null },
@@ -63,7 +62,6 @@ export class PostProcessingManager {
     const w = window.innerWidth;
     const h = window.innerHeight;
 
-    // HalfFloat HDR target — blooms over the full dynamic range from the shader.
     const rt = new THREE.WebGLRenderTarget(w, h, {
       type:   THREE.HalfFloatType,
       format: THREE.RGBAFormat,
@@ -72,11 +70,10 @@ export class PostProcessingManager {
     this.composer = new EffectComposer(renderer, rt);
     this.composer.addPass(new RenderPass(scene, camera));
 
-    // Bloom: slightly raised threshold so only disk core and photon ring glow.
-    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.4, 0.9, 0.18);
+     // NORMALIZED: reduced strength (1.0 instead of 1.4) to match softer Doppler in shader
+     this.bloomPass = new UnrealBloomPass(new THREE.Vector2(w, h), 1.12, 0.82, 0.22);
     this.composer.addPass(this.bloomPass);
 
-    // Anamorphic horizontal streak pass (runs after bloom).
     this.flarePass = new ShaderPass(AnamorphicFlareMaterial);
     const mat = this.flarePass.material as THREE.ShaderMaterial;
     (mat.uniforms.uInvResolution.value as THREE.Vector2).set(1 / w, 1 / h);

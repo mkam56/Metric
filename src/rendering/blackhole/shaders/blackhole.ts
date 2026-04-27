@@ -92,7 +92,7 @@ float emissivity(float r, float rIn) {
 
 float diskHalfHeight(float r) {
   float rn = max(r, uDiskInner) / max(uDiskInner, 1e-4);
-  return uDiskH0 * pow(rn, uDiskFlare);
+  return uDiskH0 * 0.42 * pow(rn, max(0.55, uDiskFlare * 0.55));
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -170,6 +170,12 @@ void main() {
   const int   STEPS = 300;
   const int   MAX_VOL_STEPS = 128;
   const float MAX_R = 500.0;
+  // Slightly reduced lensing to recover a wider, less pinched disk silhouette.
+  const float LENS_BASE = 1.28;
+  const float LENS_NEAR_GAIN = 1.05;
+  const float LENS_NEAR_POWER = 1.75;
+  const float MAX_TURN_NEAR = 0.060;
+  const float MAX_TURN_FAR = 0.016;
 
   int volSteps = clamp(int(uDiskVolSteps), 1, MAX_VOL_STEPS);
 
@@ -181,14 +187,27 @@ void main() {
     if (transmittance < 0.002) break;
 
     float dt = clamp(0.06 * (r - uRs), 0.015, 2.5);
+    // Keep integration tighter near horizon: stronger bending needs a smaller local step.
+    float nearH = pow(clamp(uRs / max(r, 1e-4), 0.0, 1.0), 1.8);
+    dt *= mix(1.0, 0.58, nearH);
     vec3 marchDir = dir;
     vec3 prevPos  = pos;
     pos          += marchDir * dt;
 
-    // Geodesic deflection: d²r/dλ² = −(1.5 h²/r⁵)·r_vec
-    float r2 = r * r;
-    float r5 = r2 * r2 * r;
-    dir      += (-1.5 * h2 / max(r5, 1e-6)) * pos * dt;
+    // Nonlinear lensing boost: much stronger close to horizon, gentle far away.
+    vec3 midPos = 0.5 * (prevPos + pos);
+    float rMid = length(midPos);
+    float r2 = rMid * rMid;
+    float r5 = r2 * r2 * rMid;
+    float nearBoost = pow(clamp(uRs / max(rMid, 1e-4), 0.0, 1.0), LENS_NEAR_POWER);
+    float lensCoeff = -1.5 * LENS_BASE * (1.0 + LENS_NEAR_GAIN * nearBoost);
+    vec3 dDir = (lensCoeff * h2 / max(r5, 1e-6)) * midPos * dt;
+
+    // Clamp per-step turn to avoid direction blow-ups while preserving stronger wrap.
+    float maxTurn = mix(MAX_TURN_FAR, MAX_TURN_NEAR, clamp(uRs / max(rMid, 1e-4), 0.0, 1.0));
+    float dDirLen = length(dDir);
+    if (dDirLen > maxTurn) dDir *= maxTurn / dDirLen;
+    dir = normalize(dir + dDir);
 
     if (transmittance > 0.002 && uDiskH0 > 0.0) {
       float r0 = length(prevPos.xz);
@@ -230,46 +249,177 @@ void main() {
             vec3 p = prevPos + seg * t;
             float rp = length(p.xz);
 
-            if (rp <= uDiskInner || rp >= uDiskOuter) continue;
+            if (rp >= uDiskOuter) continue;
+            // Keep only the deep cavity empty (and never below horizon), avoid a hard inner edge cut.
+            // Pull visible disk closer to the shadow while keeping a safe empty cavity.
+            float innerVoid = max(uRs * 1.002, uDiskInner * 0.90);
+            if (rp <= innerVoid) continue;
 
             float Hs = max(diskHalfHeight(rp), 1e-4);
             float z  = p.y;
 
-            float rho = exp(-0.5 * (z * z) / (Hs * Hs));
+             float rho = exp(-0.5 * (z * z) / (Hs * Hs));
 
-            float angle      = atan(p.z, p.x);
-            float swirl      = angle + log(max(rp * 0.3, 1e-4)) * 2.5 - uTime * 0.12;
-            vec2 noiseP      = vec2(cos(swirl), sin(swirl)) * rp * 0.28;
-            float turbulence = fbm(noiseP);
-            float turbulenceTerm = 0.6 * turbulence;
+             float angle      = atan(p.z, p.x);
+             float swirl      = angle + log(max(rp * 0.3, 1e-4)) * 2.5 - uTime * 0.12;
+             vec2 noiseP      = vec2(cos(swirl), sin(swirl)) * rp * 0.28;
+             float turbulence = fbm(noiseP);
+             
+             // === AGGRESSIVE MULTISCALE PROCEDURAL STRUCTURE ===
+             // Radial normalized coordinate for layer modulation
+             float rNorm = (rp - uDiskInner) / max(uDiskOuter - uDiskInner, 1e-4);
+             // Soft radial ramps: brighter/denser inner approach + gentle outer taper.
+             float innerFade = smoothstep(uDiskInner * 0.90, uDiskInner * 1.03, rp);
+             float outerFade = 1.0 - smoothstep(uDiskOuter * 0.95, uDiskOuter, rp);
+             // Mild bright rim near the inner edge to visually reduce the BH-disk gap.
+             float innerRimBoost = 1.0 + 0.48 * (1.0 - smoothstep(uDiskInner * 0.98, uDiskInner * 1.38, rp));
+             
+             // ===== LAYER 1: ULTRA-FINE GRAIN (dust particles) =====
+             vec2 ultraFineP = noiseP * 8.5;
+             ultraFineP += vec2(cos(uTime * 0.025), sin(uTime * 0.025)) * 0.2;
+             float ultraFineGrain = fbm(ultraFineP * 0.3) * 0.08;
+             
+             // ===== LAYER 2: FINE GRAIN (pebble-scale texture) =====
+             vec2 fineNoiseP = noiseP * 4.2;
+             fineNoiseP += vec2(cos(uTime * 0.02), sin(uTime * 0.02)) * 0.15;
+             float fineGrain = fbm(fineNoiseP * 0.5) * 0.15;
+             
+             // ===== LAYER 3: MEDIUM CLUMPS (dominant multiscale) =====
+             vec2 clumpNoiseP = vec2(noiseP.x * 0.7, noiseP.y * 2.1);
+             float clumpRaw = fbm(clumpNoiseP);
+             float clumps = pow(clamp(clumpRaw * 0.8 + 0.2, 0.0, 1.0), 1.4) * 0.5;
+             
+             // ===== LAYER 4: AGGRESSIVE ANISOTROPIC FILAMENTS (plasma streams) =====
+             // Primary filament layer: thread-like structures along azimuth
+             vec2 filament1P = vec2(angle * 3.0, log(rp) * 1.2) + vec2(uTime * 0.015, 0.0);
+             float filament1Raw = fbm(filament1P);
+             // Apply threshold and power for sharp, defined streaks
+             float filaments1 = pow(clamp(filament1Raw - 0.65, 0.0, 1.0), 2.8) * 0.7;
+             
+             // Secondary filament layer: finer, more chaotic threads
+             vec2 filament2P = vec2(angle * 5.5, log(rp) * 2.8) - vec2(uTime * 0.018, uTime * 0.008);
+             float filament2Raw = fbm(filament2P * 1.3);
+             float filaments2 = pow(clamp(filament2Raw - 0.72, 0.0, 1.0), 3.2) * 0.5;
+             
+             // ===== LAYER 5: HOT CLUMPS (rare bright knots, concentrated inner disk) =====
+             float hotspotNoise = valueNoise(noiseP * 3.0);
+             float timePhase = sin(uTime * 0.04) * 0.1;
+             float hotspots = pow(clamp(hotspotNoise - 0.70 + timePhase, 0.0, 1.0), 2.5) * 0.8;
+             // Boost hotspots near inner disk
+             hotspots *= 1.0 + (1.0 - clamp(rNorm * 2.0, 0.0, 1.0)) * 1.5;
+             
+             // ===== LAYER 6: DISK MIDPLANE INTENSITY VARIATION =====
+             // Create z-dependent variation: bright core, fading into haze layers
+             float zNorm = abs(z) / max(diskHalfHeight(rp), 1e-4);
+             float midplaneCore = exp(-zNorm * zNorm * 6.5);
+             float hazeLayer = exp(-zNorm * zNorm * 0.3) * (1.0 - midplaneCore); // Outer glow
+             // Broader emissive envelope so upper/lower arcs stay thicker and more readable.
+             float verticalEmissive = exp(-zNorm * zNorm * 3.2);
+             float arcLift = smoothstep(0.08, 0.65, zNorm) * (1.0 - smoothstep(0.72, 1.0, rNorm));
+             
+             // ===== LAYER 7: SCATTERING FILAMENT NOISE (volumetric threads) =====
+             // High-frequency noise for thin scattering features
+             vec2 scatterP = vec2(angle * 8.0 + sin(log(rp) * 2.0), log(rp) * 0.8);
+             scatterP += vec2(cos(uTime * 0.022) * 0.08, sin(uTime * 0.019) * 0.08);
+             float scatter = fbm(scatterP * 2.1) * 0.12;
+             
+             // ===== COMPOSITE DETAIL: Aggressive multiscale mix =====
+             // Combine all layers with different weights
+             float detailBase = ultraFineGrain * 0.3 + fineGrain * 0.5 + clumps * 1.3 
+                              + filaments1 * 1.8 + filaments2 * 1.2 + hotspots * 1.5 + scatter * 0.8;
+             
+             // Apply radial modulation: inner disk much more active
+             float radialIntensity = mix(2.0, 0.4, clamp(rNorm, 0.0, 1.0));
+             float detailModulation = clamp(detailBase * radialIntensity * midplaneCore, 0.0, 2.0);
+             
+             float turbulenceTerm = 0.6 * turbulence + 0.35 * detailModulation;
 
-            float j = emissivity(rp, uDiskInner) * rho * (1.0 + turbulenceTerm);
-            float kappa = uDiskOpacity * rho * pow(max(rp / max(uDiskInner, 1e-4), 1e-4), -0.6);
+             // ===== AGGRESSIVE EMISSIVITY MODULATION =====
+             // Use both base Novikov-Thorne and procedural detail boost
+             // Use a slightly softened inner radius for emissivity and blend by innerFade.
+             float rpEm = max(rp, uDiskInner * 1.04);
+             float j = emissivity(rpEm, uDiskInner) * rho * (0.85 + 0.45 * verticalEmissive) * (1.0 + turbulenceTerm);
+             j *= innerFade * outerFade * innerRimBoost;
+             // Extra boost for inner disk filament activity
+             j *= 1.0 + filaments1 * 1.2 + filaments2 * 0.8;
+             
+             // ===== COMPLEX DENSITY MODULATION =====
+             // Different structures affect absorption differently
+             float densityMod = 1.0 
+                              + clumps * 0.65 * radialIntensity 
+                              + filaments1 * 0.35 
+                              + filaments2 * 0.25
+                              + hotspots * 0.3
+                              + scatter * 0.15
+                              + (1.0 - midplaneCore) * 0.5; // Haze absorption
+             // Softer inner absorption falloff avoids a hard dark notch at the inner edge.
+             float innerAbsorbFade = mix(0.78, 1.0, innerFade);
+             float kappa = uDiskOpacity * rho * pow(max(rp / max(uDiskInner, 1e-4), 1e-4), -0.6) * densityMod * innerAbsorbFade * outerFade;
 
-            vec3  tangent = normalize(vec3(-p.z, 0.0, p.x));
-            vec3  toObs   = normalize(uCameraPos - p);
-            float cosA    = -dot(tangent, toObs);
-            float v       = clamp(sqrt(uMass / max(1e-4, rp - uRs)), 0.0, 0.999);
-            float gamma   = 1.0 / sqrt(max(1e-5, 1.0 - v * v));
-            float grav    = sqrt(max(0.0, 1.0 - uRs / rp));
-            float doppler = 1.0 / max(1e-4, gamma * (1.0 - v * cosA));
-            float g       = grav * doppler;
-            float g3      = g * g * g;
+             vec3  tangent = normalize(vec3(-p.z, 0.0, p.x));
+             vec3  toObs   = normalize(uCameraPos - p);
+             float cosA    = -dot(tangent, toObs);
+             float v       = clamp(sqrt(uMass / max(1e-4, rp - uRs)), 0.0, 0.999);
+             float gamma   = 1.0 / sqrt(max(1e-5, 1.0 - v * v));
+             float grav    = sqrt(max(0.0, 1.0 - uRs / rp));
+             float doppler = 1.0 / max(1e-4, gamma * (1.0 - v * cosA));
+             float g       = grav * doppler;
+             // NORMALIZED: replace aggressive g^3 with softer power (g^1.2) to reduce Doppler overheat
+             float g_smooth = pow(clamp(g, 0.0, 2.0), 1.2);
 
-            float sqF     = sqrt(uDiskInner / rp);
-            float tempRaw = pow(rp, -0.75) * pow(max(1e-4, 1.0 - sqF), 0.25);
-            float temp    = clamp(tempRaw / uTempScale, 0.0, 1.0);
+             float sqF     = sqrt(uDiskInner / rp);
+             float tempRaw = pow(rp, -0.75) * pow(max(1e-4, 1.0 - sqF), 0.25);
+             float temp    = clamp(tempRaw / uTempScale, 0.0, 1.0);
 
-            float mu    = clamp(abs(dot(vec3(0.0, 1.0, 0.0), -segDir)), 0.0, 1.0);
-            float limb  = mix(0.35, 1.0, pow(mu, 0.7));
-            vec3 col    = blackbody(clamp(temp * clamp(g * 0.6, 0.0, 1.0), 0.0, 1.0));
+             float mu    = clamp(abs(dot(vec3(0.0, 1.0, 0.0), -segDir)), 0.0, 1.0);
+             float limb  = mix(0.35, 1.0, pow(mu, 0.7));
+             
+              // === AGGRESSIVE BRIGHTNESS MODULATION ===
+              // Ultra-fine grain contributes minimally
+              float ultraFineContrib = ultraFineGrain * 0.08;
+              // Fine grain subtle
+              float fineContrib = fineGrain * 0.12;
+              // Clumps darken regions
+              float clumpContrib = -clumps * 0.5;
+              // Primary filaments: bright plasma streams (REDUCED for balance)
+              float filament1Contrib = filaments1 * 1.8;
+              // Secondary filaments: additional fine bright features
+              float filament2Contrib = filaments2 * 1.2;
+              // Hot clumps: intense bright knots
+              float hotspotsContrib = hotspots * 1.8;
+              // Haze glow: soft surrounding light
+              float hazeGlow = hazeLayer * 0.4;
+              
+              // Balanced composite brightness WITHOUT excessive inner disk boost
+              float localBrightness = 1.0 + ultraFineContrib + fineContrib + clumpContrib 
+                                    + filament1Contrib + filament2Contrib + hotspotsContrib 
+                                    + hazeGlow;
+              
+              // More balanced brightness range - INCREASED for vivid plasma
+              localBrightness = clamp(localBrightness, 0.6, 2.8);
+              
+              // NORMALIZED: reduce Doppler influence on color temp
+              vec3 col    = blackbody(clamp(temp * clamp(g * 0.3, 0.0, 1.0), 0.0, 1.0));
 
-            float emission = j * g3 * limb * 6.0;
-            float absorb   = max(kappa, 0.0);
+              // === BALANCED EMISSION: Bright plasma WITHOUT Doppler overkill ===
+              // Keep emission strong for plazma visibility, but REDUCE Doppler multiplier
+              // Base: 5.5 + detail boost for bright, vivid plasma
+              float emissionBase = 5.0 + filaments1 * 2.0 + filaments2 * 1.2;
+              // CRITICAL: Reduce g_smooth influence to prevent half-disk overexposure
+              float g_doppler = mix(1.0, g_smooth, 0.4); // Only 40% of Doppler effect
+              // Slightly lift off-midplane / farther-ring contribution to widen lensed upper arc.
+              // Extra lift for the receding/lensed side so the upper arc reads as a second bright band.
+              float farSideBoost = smoothstep(0.02, 0.82, -cosA);
 
-            accum += col * emission * transmittance * ds;
-            transmittance *= exp(-absorb * ds);
-            if (transmittance < 0.002) break;
+              // Верхняя линзованная полоса должна читаться как вторая яркая лента
+              float arcEmissionBoost = 1.0 + 0.85 * arcLift + 0.95 * arcLift * farSideBoost;
+
+              float emission = j * g_doppler * limb * emissionBase * localBrightness * arcEmissionBoost;
+              float absorb   = max(kappa, 0.0);
+
+             accum += col * emission * transmittance * ds;
+             transmittance *= exp(-absorb * ds);
+             if (transmittance < 0.002) break;
           }
         }
       }
