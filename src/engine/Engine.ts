@@ -3,8 +3,9 @@ import { SceneManager }      from './SceneManager';
 import { TimeController }    from './TimeController';
 import { CameraController }  from './CameraController';
 import { BlackHoleScene }    from '../scenes/BlackHoleScene';
-import { QuasarScene }       from '../scenes/QuasarScene';  
+import { QuasarScene }       from '../scenes/QuasarScene';
 import { PulsarScene }       from '../scenes/PulsarScene';
+import { KerrBlackHoleScene } from '../scenes/KerrBlackHoleScene';
 import { BaseScene }         from '../scenes/BaseScene';
 
 export class Engine {
@@ -99,8 +100,12 @@ export class Engine {
     const sceneName = new URLSearchParams(window.location.search).get('scene');
     if (sceneName === 'quasar') {
       return new QuasarScene();
+    }
     if (sceneName === 'pulsar') {
       return new PulsarScene();
+    }
+    if (sceneName === 'kerr') {
+      return new KerrBlackHoleScene();
     }
     return new BlackHoleScene();
   }
