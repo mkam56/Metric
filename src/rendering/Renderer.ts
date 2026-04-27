@@ -13,7 +13,7 @@ export class Renderer {
     this.webGLRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     // ACES filmic — applied on composer’s final blit to screen.
     this.webGLRenderer.toneMapping       = THREE.ACESFilmicToneMapping;
-    this.webGLRenderer.toneMappingExposure = 1.2;
+    this.webGLRenderer.toneMappingExposure = 1.4;
     this.webGLRenderer.outputColorSpace  = THREE.SRGBColorSpace;
     window.addEventListener('resize', () => this.onResize());
   }
