@@ -16,7 +16,7 @@ export class BlackHoleScene extends BaseScene {
 
   constructor() {
     super();
-    // Normalized units: G=1, c=1. mass=1 → r_s=2, r_isco=6.
+    // Normalized units: G=1, c=1. mass=1 → r_s=2, r_isco=6
     this.blackHole = new BlackHoleModel(1);
     this.disk      = new AccretionDiskModel(
       this.blackHole.iscoRadius,
@@ -25,7 +25,7 @@ export class BlackHoleScene extends BaseScene {
     );
   }
 
-  // Wire the actual Three.js camera so uniforms stay in sync.
+  // Wire the actual Three.js camera so uniforms stay in sync
   linkCamera(camera: THREE.Camera): void {
     this._camera = camera;
   }
@@ -36,21 +36,21 @@ export class BlackHoleScene extends BaseScene {
       rs:        this.blackHole.schwarzschildRadius,
       diskInner: this.disk.innerRadius,
       diskOuter: this.disk.outerRadius,
-      diskH0:    0.35,
-      diskFlare: 0.15,
+      diskH0:    0.72,
+      diskFlare: 0.10,
       diskOpacity: 0.9,
-      diskVolSteps: 12.0,
+      diskVolSteps: 18.0,
       tempScale: this.disk.tempScale,
     });
 
-    // Full-screen quad: PlaneGeometry(2,2) positions span NDC [-1,+1].
-    // frustumCulled=false ensures it's never clipped by the camera.
+    // Full-screen quad: PlaneGeometry(2,2) positions span NDC [-1,+1]
+    // frustumCulled=false ensures it's never clipped by the camera
     const geo  = new THREE.PlaneGeometry(2, 2);
     this.quad  = new THREE.Mesh(geo, this.material);
     this.quad.frustumCulled = false;
     renderer.addObject(this.quad);
 
-    // Init post-processing after scene objects are set up.
+    // Init post-processing after scene objects are set up
     if (this._camera) {
       renderer.initPostProcessing(this._camera);
     }

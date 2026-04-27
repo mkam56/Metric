@@ -5,7 +5,7 @@ export class ObserverModel {
   y: number;
   z: number;
 
-  // Camera forward direction (unit vector). Used for future view-angle effects.
+  // Camera forward direction (unit vector). Used for future view-angle effects
   fx: number;
   fy: number;
   fz: number;
@@ -16,14 +16,14 @@ export class ObserverModel {
     this.fx = fx / len; this.fy = fy / len; this.fz = fz / len;
   }
 
-  // Update position and forward direction to match camera each frame.
+  // Update position and forward direction to match camera each frame
   setFromCamera(x: number, y: number, z: number, fx: number, fy: number, fz: number): void {
     this.x = x; this.y = y; this.z = z;
     const len = Math.sqrt(fx * fx + fy * fy + fz * fz) || 1;
     this.fx = fx / len; this.fy = fy / len; this.fz = fz / len;
   }
 
-  // Normalized line-of-sight vector: particle → observer.
+  // Normalized line-of-sight vector: particle → observer
   lineOfSightUnit(px: number, py: number, pz: number): [number, number, number] {
     const lx = this.x - px;
     const ly = this.y - py;

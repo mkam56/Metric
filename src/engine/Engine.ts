@@ -4,6 +4,7 @@ import { TimeController }    from './TimeController';
 import { CameraController }  from './CameraController';
 import { BlackHoleScene }    from '../scenes/BlackHoleScene';
 import { QuasarScene }       from '../scenes/QuasarScene';  
+import { PulsarScene }       from '../scenes/PulsarScene';
 import { BaseScene }         from '../scenes/BaseScene';
 
 export class Engine {
@@ -98,6 +99,8 @@ export class Engine {
     const sceneName = new URLSearchParams(window.location.search).get('scene');
     if (sceneName === 'quasar') {
       return new QuasarScene();
+    if (sceneName === 'pulsar') {
+      return new PulsarScene();
     }
     return new BlackHoleScene();
   }
