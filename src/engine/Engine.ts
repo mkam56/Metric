@@ -2,7 +2,11 @@ import { Renderer }          from '../rendering/Renderer';
 import { SceneManager }      from './SceneManager';
 import { TimeController }    from './TimeController';
 import { CameraController }  from './CameraController';
-import { KerrBlackHoleScene }    from '../scenes/KerrBlackHoleScene';
+import { BlackHoleScene }    from '../scenes/BlackHoleScene';
+import { QuasarScene }       from '../scenes/QuasarScene';
+import { PulsarScene }       from '../scenes/PulsarScene';
+import { KerrBlackHoleScene } from '../scenes/KerrBlackHoleScene';
+import { BaseScene }         from '../scenes/BaseScene';
 
 export class Engine {
   private renderer:        Renderer;
@@ -22,9 +26,12 @@ export class Engine {
     this.sceneManager     = new SceneManager(this.renderer);
     this.timeController   = new TimeController();
 
-    const scene = new KerrBlackHoleScene();
+    const scene = this.createInitialScene();
     // Link camera before setScene() so it's available inside init().
-    scene.linkCamera(this.cameraController.camera);
+    if ('linkCamera' in scene && typeof scene.linkCamera === 'function') {
+      // Link camera before setScene() so it's available inside init().
+      scene.linkCamera(this.cameraController.camera);
+    }
     this.sceneManager.setScene(scene);
 
     this.debugOverlay = this.createDebugOverlay();
@@ -87,6 +94,20 @@ export class Engine {
       `FPS: ${this.fpsSmoothed.toFixed(1)}\n` +
       `uTime: ${this.elapsedTime.toFixed(2)}\n` +
       `Camera: ${cam.x.toFixed(2)}, ${cam.y.toFixed(2)}, ${cam.z.toFixed(2)}`;
+  }
+
+  private createInitialScene(): BaseScene {
+    const sceneName = new URLSearchParams(window.location.search).get('scene');
+    if (sceneName === 'quasar') {
+      return new QuasarScene();
+    }
+    if (sceneName === 'pulsar') {
+      return new PulsarScene();
+    }
+    if (sceneName === 'kerr') {
+      return new KerrBlackHoleScene();
+    }
+    return new BlackHoleScene();
   }
 
   private onKeyDown = (event: KeyboardEvent): void => {
