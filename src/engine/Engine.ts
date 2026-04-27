@@ -1,3 +1,4 @@
+import * as THREE            from 'three';
 import { Renderer }          from '../rendering/Renderer';
 import { SceneManager }      from './SceneManager';
 import { TimeController }    from './TimeController';
@@ -137,50 +138,51 @@ export class Engine {
       window.open(url, '_blank');
     }
   };
+
   playFreeModeIntro(onComplete?: () => void): void {
-  this.cameraController.animateTo(
-    new THREE.Vector3(-8, 16, 34),
-    new THREE.Vector3(0, 0, 0),
-    2000,
-    onComplete,
-    4
-  );
-}
+    this.cameraController.animateTo(
+      new THREE.Vector3(-8, 16, 34),
+      new THREE.Vector3(0, 0, 0),
+      2000,
+      onComplete,
+      4
+    );
+  }
 
-lockCameraControls(): void {
-  this.cameraController.lockUserControls();
-}
+  lockCameraControls(): void {
+    this.cameraController.lockUserControls();
+  }
 
-unlockCameraControls(): void {
-  this.cameraController.unlockUserControls();
-}
+  unlockCameraControls(): void {
+    this.cameraController.unlockUserControls();
+  }
 
-playTourStop(
-  position: { x: number; y: number; z: number },
-  target: { x: number; y: number; z: number },
-  onComplete?: () => void
-): void {
-  this.cameraController.animateTo(
-    new THREE.Vector3(position.x, position.y, position.z),
-    new THREE.Vector3(target.x, target.y, target.z),
-    1800,
-    onComplete,
-    3
-  );
-}
+  playTourStop(
+    position: { x: number; y: number; z: number },
+    target: { x: number; y: number; z: number },
+    onComplete?: () => void
+  ): void {
+    this.cameraController.animateTo(
+      new THREE.Vector3(position.x, position.y, position.z),
+      new THREE.Vector3(target.x, target.y, target.z),
+      1800,
+      onComplete,
+      3
+    );
+  }
 
-startTourOrbit(
-  orbit: { yawAmplitude: number; yawSpeed: number; verticalBob?: number },
-  target: { x: number; y: number; z: number }
-): void {
-  this.cameraController.startAutoOrbit(
-    new THREE.Vector3(target.x, target.y, target.z),
-    orbit
-  ); 
-}
+  startTourOrbit(
+    orbit: { yawAmplitude: number; yawSpeed: number; verticalBob?: number },
+    target: { x: number; y: number; z: number }
+  ): void {
+    this.cameraController.startAutoOrbit(
+      new THREE.Vector3(target.x, target.y, target.z),
+      orbit
+    );
+  }
 
-stopTourOrbit(): void {
-  this.cameraController.stopAutoOrbit();
-}
+  stopTourOrbit(): void {
+    this.cameraController.stopAutoOrbit();
+  }
 }
 
