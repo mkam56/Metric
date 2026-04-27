@@ -1,10 +1,4 @@
-import { Engine } from './engine/Engine';
+import { App } from './ui/App';
 
-const canvas = document.createElement('canvas');
-canvas.style.position = 'fixed';
-canvas.style.top = '0';
-canvas.style.left = '0';
-document.body.appendChild(canvas);
-
-const engine = new Engine(canvas);
-engine.start();
+const app = new App();
+app.mount();
