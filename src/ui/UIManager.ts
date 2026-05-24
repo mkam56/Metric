@@ -47,6 +47,7 @@ export class UIManager {
       return;
     }
 
+    current.style.pointerEvents = 'none';
     current.style.transition = `opacity ${durationMs}ms ease`;
     current.style.opacity = '1';
 

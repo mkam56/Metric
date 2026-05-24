@@ -11,6 +11,17 @@ import { NeutronStarScene } from '../scenes/NeutronStarScene';
 import { KerrBlackHoleScene } from '../scenes/KerrBlackHoleScene';
 import { BaseScene } from '../scenes/BaseScene';
 import type { CameraPreset, SphereId } from '../content/spheres';
+import * as THREE            from 'three';
+import { Renderer }          from '../rendering/Renderer';
+import { SceneManager }      from './SceneManager';
+import { TimeController }    from './TimeController';
+import { CameraController }  from './CameraController';
+import { BlackHoleScene }    from '../scenes/BlackHoleScene';
+import { QuasarScene }       from '../scenes/QuasarScene';
+import { PulsarScene }       from '../scenes/PulsarScene';
+import { KerrBlackHoleScene } from '../scenes/KerrBlackHoleScene';
+import { NeutronStarScene }  from '../scenes/NeutronStarScene';
+import { BaseScene }         from '../scenes/BaseScene';
 
 export class Engine {
   private renderer: Renderer;

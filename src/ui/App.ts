@@ -22,14 +22,29 @@ export class App {
   constructor() {
     this.canvas = document.createElement('canvas');
     this.uiManager = new UIManager();
+    this.uiEnabled = this.shouldEnableUi();
   }
 
   mount(): void {
     this.setupCanvas();
-    this.uiManager.mount();
 
     this.startEngineIfNeeded();
+
+    if (!this.uiEnabled) {
+      return;
+    }
+
+    this.uiManager.mount();
     this.showWelcomeScreen();
+  }
+
+  private shouldEnableUi(): boolean {
+    const sceneName = new URLSearchParams(window.location.search).get('scene');
+    if (!sceneName) {
+      return true;
+    }
+
+    return sceneName === 'black_hole' || sceneName === 'black-hole';
   }
 
   private setupCanvas(): void {
