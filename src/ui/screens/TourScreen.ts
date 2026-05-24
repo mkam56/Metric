@@ -1,118 +1,5 @@
-export type TourStop = {
-  id: string;
-  title: string;
-  text: string;
-  cameraPosition: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  target: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  durationMs: number;
-  orbit?: TourOrbit;
-};
-type TourOrbit = {
-  enabled: boolean;
-  yawAmplitude: number; // насколько широко качаемся в стороны
-  yawSpeed: number;     // скорость
-  verticalBob?: number; // лёгкое движение вверх-вниз
-};
-
-export const TOUR_STOPS: TourStop[] = [
-  {
-    id: 'overview',
-    title: '1. Общий вид чёрной дыры',
-    text: 'Перед нами не просто тёмный шар в космосе. Сама чёрная дыра не светится и не отражает свет, поэтому напрямую увидеть её нельзя. Мы замечаем её по тому, как она действует на окружающее вещество и на свет. Горячий газ и пыль вокруг неё образуют аккреционный диск — раскалённую структуру, которая может излучать в разных диапазонах, вплоть до рентгеновского. Ещё один важный момент: чёрная дыра — не “космический пылесос”, который всасывает всё подряд. Если находиться достаточно далеко, её гравитация действует так же, как гравитация любого другого объекта той же массы.',
-    cameraPosition: { x: 0, y: 18, z: 34 },
-    target: { x: 0, y: 0, z: 0 },
-    durationMs: 50000,
-    orbit: {
-    enabled: true,
-    yawAmplitude: 0.18,
-    yawSpeed: 0.02,
-    verticalBob: 0.4
-  }
-
-  },
-  {
-    id: 'overview',
-    title: '2. Горизонт событий',
-    text: 'Самая важная граница у чёрной дыры — это горизонт событий. Его часто называют точкой невозврата. Если объект пересекает эту границу, выбраться обратно уже не сможет даже свет. Но на визуализациях мы обычно видим не сам горизонт событий, а тёмную область и яркое кольцо вокруг неё. Это связано с тем, что горячий газ светится, а сильная гравитация искривляет траектории света. Поэтому наблюдатель видит характерную “тень” чёрной дыры на фоне светящегося вещества. Именно такой принцип лежит в основе известных изображений, полученных телескопом Event Horizon Telescope.',
-    cameraPosition: { x: -14, y: 12, z: 26 },
-    target: { x: 0, y: 0, z: 0 },
-    durationMs: 50000,
-    orbit: {
-    enabled: true,
-    yawAmplitude: 0.18,
-    yawSpeed: 0.02,
-    verticalBob: 0.4
-  }
-
-  },
-  {
-    id: 'overview',
-    title: '3. Аккреционный диск',
-    text: 'Сейчас хорошо видно, что самый зрелищный элемент здесь — это не сама чёрная дыра, а аккреционный диск. Он состоит из газа и пыли, которые закручиваются вокруг чёрной дыры и постепенно падают внутрь. По мере движения вещество нагревается из-за трения и огромных скоростей, поэтому диск начинает ярко светиться. NASA отдельно подчёркивает, что такие диски могут излучать во многих диапазонах, включая рентгеновский. Иногда часть вещества не падает сразу, а перенаправляется в виде струй — джетов, которые вырываются от чёрной дыры с очень высокой скоростью. По этим эффектам астрономы и находят многие чёрные дыры.',
-    cameraPosition: { x: 20, y: 10, z: 20 },
-    target: { x: 0, y: 0, z: 0 },
-    durationMs: 50000,
-    orbit: {
-    enabled: true,
-    yawAmplitude: 0.18,
-    yawSpeed: 0.02,
-    verticalBob: 0.4
-  }
-
-  },
-  {
-    id: 'overview',
-    title: '4. Искривление света и “кольца”',
-    text: 'Здесь особенно важно смотреть не только на диск, но и на то, как ведёт себя свет рядом с чёрной дырой. Сильная гравитация искривляет пространство-время, а вместе с ним и траектории лучей. Поэтому свет может огибать чёрную дыру, и наблюдатель видит искажения, дублирующиеся участки диска и яркие кольцевые структуры. В материалах NASA про визуализацию чёрной дыры прямо говорится о photon rings — светящихся кольцах, возникающих из-за света, который обошёл чёрную дыру один или несколько раз. Из-за этого изображение рядом с чёрной дырой выглядит не интуитивно и кажется почти “ломающим” обычную перспективу.',
-    cameraPosition: { x: 0, y: 28, z: 42 },
-    target: { x: 0, y: 0, z: 0 },
-    durationMs: 50000,
-    orbit: {
-    enabled: true,
-    yawAmplitude: 0.18,
-    yawSpeed: 0.02,
-    verticalBob: 0.4
-  }
-
-  },
-  {
-    id: 'overview',
-    title: '5. Что будет с человеком рядом с чёрной дырой',
-    text: 'Если представить путешествие к чёрной дыре, начинается самое странное. Во-первых, рядом с ней время идёт иначе: чем ближе к сильному источнику гравитации, тем медленнее течёт время по сравнению с удалённым наблюдателем. NASA приводит пример, что объект, приближающийся к горизонту событий, со стороны будет казаться всё более медленным, почти “застывшим”. Во-вторых, возникает так называемая спагеттификация: разница в гравитационном притяжении между ближней и дальней частью тела начинает растягивать объект. При этом NASA отдельно отмечает, что для сверхмассивной чёрной дыры пересечение горизонта может быть мягче, чем для чёрной дыры звёздной массы, потому что приливные силы у горизонта там слабее.',
-    cameraPosition: { x: 16, y: 6, z: 30},
-    target: { x: 0, y: 0, z: 0 },
-    durationMs: 50000,
-    orbit: {
-    enabled: true,
-    yawAmplitude: 0.18,
-    yawSpeed: 0.02,
-    verticalBob: 0.4
-  }
-  },
-
-  {
-    id: 'overview',
-    title: '6. Реальные чёрные дыры: Sgr A* и M87*',
-    text: 'И всё это не только теория. В центре нашей галактики находится Sagittarius A*, или Sgr A* — сверхмассивная чёрная дыра примерно в 27 тысячах световых лет от Земли, с массой около четырёх миллионов Солнц. В 2022 году Event Horizon Telescope получил её первое изображение. До этого в 2019 году был показан первый в истории снимок чёрной дыры M87* в галактике Messier 87. Она гораздо дальше — примерно в 55 миллионах световых лет от нас — и намного массивнее: около 6.5 миллиарда солнечных масс. Интересно, что рядом с горизонтом обе чёрные дыры выглядят удивительно похоже, хотя по масштабу сильно различаются.',
-    cameraPosition: { x: -10, y: 20, z: 38},
-    target: { x: 0, y: 0, z: 0 },
-    durationMs: 60000,
-    orbit: {
-    enabled: true,
-    yawAmplitude: 0.18,
-    yawSpeed: 0.02,
-    verticalBob: 0.4
-  }
-  },
-];
+import type { TourStop } from '../../content/spheres';
+import { UI_THEME } from '../theme';
 
 type TourScreenCallbacks = {
   onNext: () => void;
@@ -122,6 +9,7 @@ type TourScreenCallbacks = {
 };
 
 type TourScreenParams = {
+  sphereTitle: string;
   stop: TourStop;
   index: number;
   total: number;
@@ -136,9 +24,8 @@ export class TourScreen {
     root.style.position = 'absolute';
     root.style.inset = '0';
     root.style.pointerEvents = 'none';
-    //
     root.style.opacity = '0';
-    root.style.transition = 'opacity 700ms ease';
+    root.style.transition = 'opacity 650ms ease';
 
     const topBar = document.createElement('div');
     topBar.style.position = 'absolute';
@@ -148,85 +35,159 @@ export class TourScreen {
     topBar.style.display = 'flex';
     topBar.style.justifyContent = 'space-between';
     topBar.style.alignItems = 'center';
-    topBar.style.pointerEvents = 'none';
-    //
+    topBar.style.gap = '16px';
+    topBar.style.pointerEvents = 'auto';
     topBar.style.opacity = '0';
-    topBar.style.transition = 'opacity 700ms ease, transform 320ms ease';
+    topBar.style.transition = 'opacity 650ms ease, transform 320ms ease';
 
-    
+    const tourMeta = document.createElement('div');
+    tourMeta.style.padding = '16px 18px';
+    tourMeta.style.borderRadius = '20px';
+    tourMeta.style.background = UI_THEME.colors.panelStrong;
+    tourMeta.style.border = `1px solid ${UI_THEME.colors.border}`;
+    tourMeta.style.backdropFilter = 'blur(14px)';
+    tourMeta.style.boxShadow = UI_THEME.shadows.panel;
+
+    const sphereLabel = document.createElement('div');
+    sphereLabel.textContent = 'ЭКСКУРСИОННЫЙ РЕЖИМ';
+    sphereLabel.style.marginBottom = '6px';
+    sphereLabel.style.color = 'rgba(244, 240, 232, 0.68)';
+    sphereLabel.style.fontFamily = UI_THEME.fonts.ui;
+    sphereLabel.style.fontSize = '11px';
+    sphereLabel.style.letterSpacing = '0.22em';
+
+    const sphereTitle = document.createElement('div');
+    sphereTitle.textContent = this.params.sphereTitle;
+    sphereTitle.style.color = UI_THEME.colors.textPrimary;
+    sphereTitle.style.fontFamily = UI_THEME.fonts.display;
+    sphereTitle.style.fontSize = '26px';
+    sphereTitle.style.fontWeight = '600';
+    sphereTitle.style.lineHeight = '1.05';
 
     const counter = document.createElement('div');
     counter.textContent = `${this.params.index + 1} / ${this.params.total}`;
-    counter.style.color = 'white';
-    counter.style.fontFamily = '"Cormorant", serif';
-    counter.style.fontSize = '20px';
-    counter.style.textShadow = '0 4px 16px rgba(0, 0, 0, 0.85)';
-    counter.style.pointerEvents = 'none';
+    counter.style.marginTop = '8px';
+    counter.style.color = UI_THEME.colors.textMuted;
+    counter.style.fontFamily = UI_THEME.fonts.ui;
+    counter.style.fontSize = '13px';
+    counter.style.letterSpacing = '0.08em';
 
-    topBar.appendChild(counter);
+    tourMeta.appendChild(sphereLabel);
+    tourMeta.appendChild(sphereTitle);
+    tourMeta.appendChild(counter);
+
+    const topActions = document.createElement('div');
+    topActions.style.display = 'flex';
+    topActions.style.alignItems = 'center';
+    topActions.style.gap = '12px';
+
+    const countdownChip = document.createElement('div');
+    countdownChip.style.padding = '12px 14px';
+    countdownChip.style.borderRadius = '16px';
+    countdownChip.style.background = UI_THEME.colors.panelStrong;
+    countdownChip.style.border = `1px solid ${UI_THEME.colors.border}`;
+    countdownChip.style.backdropFilter = 'blur(14px)';
+    countdownChip.style.boxShadow = UI_THEME.shadows.panel;
+    countdownChip.style.color = UI_THEME.colors.textPrimary;
+    countdownChip.style.fontFamily = UI_THEME.fonts.ui;
+    countdownChip.style.fontSize = '13px';
+    countdownChip.style.lineHeight = '1.35';
+
+    const menuButton = this.createTextButton('В меню', () =>
+      animateOutAndRun(this.params.callbacks.onBack)
+    );
+    menuButton.style.padding = '14px 18px';
+
+    topActions.appendChild(countdownChip);
+    topActions.appendChild(menuButton);
+
+    topBar.appendChild(tourMeta);
+    topBar.appendChild(topActions);
 
     const panel = document.createElement('div');
     panel.style.position = 'absolute';
-    panel.style.left = '32px';
-    panel.style.bottom = '32px';
-    panel.style.width = 'min(520px, calc(100vw - 64px))';
+    panel.style.left = '24px';
+    panel.style.right = '24px';
+    panel.style.bottom = '24px';
+    panel.style.maxWidth = '720px';
+    panel.style.padding = '24px';
+    panel.style.borderRadius = '28px';
+    panel.style.background = UI_THEME.colors.panel;
+    panel.style.border = `1px solid ${UI_THEME.colors.border}`;
+    panel.style.backdropFilter = 'blur(18px)';
+    panel.style.boxShadow = UI_THEME.shadows.panel;
     panel.style.pointerEvents = 'auto';
-    //
     panel.style.opacity = '0';
-    panel.style.transition = 'opacity 700ms ease, transform 320ms ease';
+    panel.style.transition = 'opacity 650ms ease, transform 320ms ease';
+
+    const progressRail = document.createElement('div');
+    progressRail.style.width = '100%';
+    progressRail.style.height = '6px';
+    progressRail.style.marginBottom = '18px';
+    progressRail.style.borderRadius = '999px';
+    progressRail.style.background = 'rgba(255, 255, 255, 0.08)';
+    progressRail.style.overflow = 'hidden';
+
+    const progressFill = document.createElement('div');
+    progressFill.style.width = '100%';
+    progressFill.style.height = '100%';
+    progressFill.style.borderRadius = '999px';
+    progressFill.style.background =
+      'linear-gradient(90deg, rgba(255,255,255,0.92) 0%, rgba(255,196,126,0.92) 100%)';
+    progressFill.style.transformOrigin = 'left center';
+    progressFill.style.transform = 'scaleX(0)';
+    progressFill.style.transition = `transform ${this.params.stop.durationMs}ms linear`;
+    progressRail.appendChild(progressFill);
 
     const title = document.createElement('h2');
     title.textContent = this.params.stop.title;
-    title.style.margin = '0 0 14px 0';
-    title.style.color = 'white';
-    title.style.fontFamily = '"Cormorant", serif';
-    title.style.fontSize = '42px';
+    title.style.margin = '0 0 14px';
+    title.style.color = UI_THEME.colors.textPrimary;
+    title.style.fontFamily = UI_THEME.fonts.display;
+    title.style.fontSize = 'clamp(32px, 4vw, 44px)';
     title.style.fontWeight = '600';
-    title.style.lineHeight = '1.1';
-    title.style.textShadow = '0 4px 16px rgba(0, 0, 0, 0.85)';
+    title.style.lineHeight = '1.05';
 
     const text = document.createElement('p');
     text.textContent = this.params.stop.text;
-    text.style.margin = '0 0 20px 0';
-    text.style.color = 'white';
-    text.style.fontFamily = '"Cormorant", serif';
-    text.style.fontSize = '28px';
-    text.style.lineHeight = '1.3';
-    text.style.textShadow = '0 4px 16px rgba(0, 0, 0, 0.85)';
+    text.style.margin = '0 0 22px';
+    text.style.color = UI_THEME.colors.textPrimary;
+    text.style.fontFamily = UI_THEME.fonts.ui;
+    text.style.fontSize = '18px';
+    text.style.lineHeight = '1.7';
 
     const controls = document.createElement('div');
     controls.style.display = 'flex';
-    controls.style.gap = '18px';
+    controls.style.gap = '12px';
     controls.style.flexWrap = 'wrap';
 
-    const prevButton = this.createTextButton(
-  '← Назад',
-  () => animateOutAndRun(this.params.callbacks.onPrev)
-);
-
-const nextButton =
-  this.params.index < this.params.total - 1
-    ? this.createTextButton(
-        'Далее →',
-        () => animateOutAndRun(this.params.callbacks.onNext)
-      )
-    : null;
-
-const skipButton = this.createTextButton(
-  'Закончить',
-  () => animateOutAndRun(this.params.callbacks.onSkip)
-);
+    const prevButton = this.createTextButton('Назад', () =>
+      animateOutAndRun(this.params.callbacks.onPrev)
+    );
     if (this.params.index === 0) {
-      prevButton.style.opacity = '0.45';
       prevButton.disabled = true;
       prevButton.style.cursor = 'default';
+      prevButton.style.opacity = '0.42';
     }
 
-    controls.appendChild(prevButton);
-if (nextButton) {
-  controls.appendChild(nextButton);
-}    controls.appendChild(skipButton);
+    const nextLabel =
+      this.params.index < this.params.total - 1 ? 'Следующая остановка' : 'Завершить экскурсию';
+    const nextButton = this.createPrimaryButton(nextLabel, () =>
+      animateOutAndRun(
+        this.params.index < this.params.total - 1
+          ? this.params.callbacks.onNext
+          : this.params.callbacks.onSkip
+      )
+    );
+    const finishButton = this.createTextButton('Завершить сейчас', () =>
+      animateOutAndRun(this.params.callbacks.onSkip)
+    );
 
+    controls.appendChild(prevButton);
+    controls.appendChild(nextButton);
+    controls.appendChild(finishButton);
+
+    panel.appendChild(progressRail);
     panel.appendChild(title);
     panel.appendChild(text);
     panel.appendChild(controls);
@@ -234,60 +195,132 @@ if (nextButton) {
     root.appendChild(topBar);
     root.appendChild(panel);
 
-    //
+    const autoAdvanceCallback =
+      this.params.index < this.params.total - 1
+        ? this.params.callbacks.onNext
+        : this.params.callbacks.onSkip;
+
+    const deadline = performance.now() + this.params.stop.durationMs;
+    let autoAdvanceTimeout = 0;
+    let countdownInterval = 0;
+
+    const clearTimers = (): void => {
+      if (autoAdvanceTimeout) {
+        window.clearTimeout(autoAdvanceTimeout);
+        autoAdvanceTimeout = 0;
+      }
+      if (countdownInterval) {
+        window.clearInterval(countdownInterval);
+        countdownInterval = 0;
+      }
+    };
+
+    const updateCountdown = (): void => {
+      const remainingMs = Math.max(0, deadline - performance.now());
+      const remainingSeconds = Math.ceil(remainingMs / 1000);
+      const minutes = Math.floor(remainingSeconds / 60);
+      const seconds = remainingSeconds % 60;
+      const formatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
+      const lead =
+        this.params.index < this.params.total - 1
+          ? 'Автопереход через'
+          : 'Экскурсия завершится через';
+
+      countdownChip.textContent = `${lead} ${formatted}`;
+    };
+
     const animateOutAndRun = (callback: () => void): void => {
-  root.style.pointerEvents = 'none';
-  root.style.opacity = '0';
+      clearTimers();
+      root.style.pointerEvents = 'none';
+      root.style.opacity = '0';
+      topBar.style.opacity = '0';
+      panel.style.opacity = '0';
 
-  topBar.style.opacity = '0';
+      window.setTimeout(() => {
+        callback();
+      }, 620);
+    };
 
-  panel.style.opacity = '0';
-
-  window.setTimeout(() => {
-    callback();
-  }, 650);
-};
+    autoAdvanceTimeout = window.setTimeout(() => {
+      animateOutAndRun(autoAdvanceCallback);
+    }, this.params.stop.durationMs);
+    countdownInterval = window.setInterval(updateCountdown, 250);
+    updateCountdown();
 
     requestAnimationFrame(() => {
-  root.style.opacity = '1';
-
-  topBar.style.opacity = '1';
-
-  panel.style.opacity = '1';
-});
+      root.style.opacity = '1';
+      topBar.style.opacity = '1';
+      panel.style.opacity = '1';
+      progressFill.style.transform = 'scaleX(1)';
+    });
 
     return root;
   }
 
-  private createTextButton(text: string, onClick: () => void): HTMLButtonElement {
+  private createTextButton(
+    text: string,
+    onClick: () => void
+  ): HTMLButtonElement {
     const button = document.createElement('button');
     button.textContent = text;
-
-    button.style.background = 'transparent';
-    button.style.border = 'none';
-    button.style.outline = 'none';
-    button.style.padding = '0';
-    button.style.color = 'white';
-    button.style.fontFamily = '"Cormorant", serif';
-    button.style.fontSize = '20px';
-    button.style.fontWeight = '500';
+    button.style.border = `1px solid ${UI_THEME.colors.border}`;
+    button.style.borderRadius = '16px';
+    button.style.padding = '14px 16px';
+    button.style.background = UI_THEME.colors.surface;
+    button.style.color = UI_THEME.colors.textPrimary;
+    button.style.fontFamily = UI_THEME.fonts.ui;
+    button.style.fontSize = '15px';
+    button.style.fontWeight = '600';
     button.style.cursor = 'pointer';
-    button.style.textShadow = '0 4px 16px rgba(0, 0, 0, 0.85)';
-    button.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-    button.style.opacity = '0.9';
+    button.style.transition = 'transform 180ms ease, background 180ms ease';
 
     button.addEventListener('mouseenter', () => {
-      if (button.disabled) return;
-      button.style.transform = 'scale(1.03)';
-      button.style.opacity = '1';
-    });
+      if (button.disabled) {
+        return;
+      }
 
+      button.style.transform = 'translateY(-1px)';
+      button.style.background = UI_THEME.colors.surfaceHover;
+    });
     button.addEventListener('mouseleave', () => {
-      if (button.disabled) return;
-      button.style.transform = 'scale(1)';
-      button.style.opacity = '0.9';
-    });
+      if (button.disabled) {
+        return;
+      }
 
+      button.style.transform = 'translateY(0)';
+      button.style.background = UI_THEME.colors.surface;
+    });
+    button.addEventListener('click', onClick);
+
+    return button;
+  }
+
+  private createPrimaryButton(
+    text: string,
+    onClick: () => void
+  ): HTMLButtonElement {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.style.border = 'none';
+    button.style.borderRadius = '16px';
+    button.style.padding = '14px 18px';
+    button.style.background =
+      'linear-gradient(135deg, rgba(255, 211, 140, 0.98) 0%, rgba(255, 177, 120, 0.96) 100%)';
+    button.style.color = '#101421';
+    button.style.fontFamily = UI_THEME.fonts.ui;
+    button.style.fontSize = '15px';
+    button.style.fontWeight = '700';
+    button.style.cursor = 'pointer';
+    button.style.transition = 'transform 180ms ease, filter 180ms ease';
+
+    button.addEventListener('mouseenter', () => {
+      button.style.transform = 'translateY(-1px)';
+      button.style.filter = 'brightness(1.05)';
+    });
+    button.addEventListener('mouseleave', () => {
+      button.style.transform = 'translateY(0)';
+      button.style.filter = 'brightness(1)';
+    });
     button.addEventListener('click', onClick);
 
     return button;

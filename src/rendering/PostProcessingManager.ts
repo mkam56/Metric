@@ -249,6 +249,20 @@ export class PostProcessingManager {
     this.composer.render();
   }
 
+  dispose(): void {
+    this.bloomPass.dispose();
+    (this.flarePass.material as THREE.ShaderMaterial).dispose();
+    (this.lensingPass?.material as THREE.ShaderMaterial | undefined)?.dispose();
+
+    const composer = this.composer as EffectComposer & {
+      renderTarget1?: THREE.WebGLRenderTarget;
+      renderTarget2?: THREE.WebGLRenderTarget;
+    };
+
+    composer.renderTarget1?.dispose();
+    composer.renderTarget2?.dispose();
+  }
+
   private updateLensingUniforms(): void {
     if (!this.lensingPass) {
       return;
