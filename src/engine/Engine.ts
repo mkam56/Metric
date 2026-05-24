@@ -1,3 +1,16 @@
+import * as THREE from 'three';
+
+import { Renderer } from '../rendering/Renderer';
+import { SceneManager } from './SceneManager';
+import { TimeController } from './TimeController';
+import { CameraController } from './CameraController';
+import { BlackHoleScene } from '../scenes/BlackHoleScene';
+import { QuasarScene } from '../scenes/QuasarScene';
+import { PulsarScene } from '../scenes/PulsarScene';
+import { NeutronStarScene } from '../scenes/NeutronStarScene';
+import { KerrBlackHoleScene } from '../scenes/KerrBlackHoleScene';
+import { BaseScene } from '../scenes/BaseScene';
+import type { CameraPreset, SphereId } from '../content/spheres';
 import * as THREE            from 'three';
 import { Renderer }          from '../rendering/Renderer';
 import { SceneManager }      from './SceneManager';
@@ -11,32 +24,30 @@ import { NeutronStarScene }  from '../scenes/NeutronStarScene';
 import { BaseScene }         from '../scenes/BaseScene';
 
 export class Engine {
-  private renderer:        Renderer;
-  private sceneManager:    SceneManager;
-  private timeController:  TimeController;
+  private renderer: Renderer;
+  private sceneManager: SceneManager;
+  private timeController: TimeController;
   private cameraController: CameraController;
-  private animationId:     number = 0;
-  private elapsedTime:     number = 0;
-  private fpsSmoothed:     number = 60;
-  private lastFrameAt:     number = performance.now();
-  private lastOverlayAt:   number = 0;
-  private debugOverlay:    HTMLDivElement;
+  private animationId = 0;
+  private elapsedTime = 0;
+  private fpsSmoothed = 60;
+  private lastFrameAt = performance.now();
+  private lastOverlayAt = 0;
+  private debugOverlay: HTMLDivElement | null = null;
+  private currentSphereId: SphereId;
 
   constructor(canvas: HTMLCanvasElement) {
-    this.renderer         = new Renderer(canvas);
+    this.renderer = new Renderer(canvas);
     this.cameraController = new CameraController(canvas);
-    this.sceneManager     = new SceneManager(this.renderer);
-    this.timeController   = new TimeController();
+    this.sceneManager = new SceneManager(this.renderer);
+    this.timeController = new TimeController();
+    this.currentSphereId = this.resolveInitialSphereId();
 
-    const scene = this.createInitialScene();
-    // Link camera before setScene() so it's available inside init().
-    if ('linkCamera' in scene && typeof scene.linkCamera === 'function') {
-      // Link camera before setScene() so it's available inside init().
-      scene.linkCamera(this.cameraController.camera);
+    this.applyScene(this.createScene(this.currentSphereId));
+
+    if (new URLSearchParams(window.location.search).get('debug') === '1') {
+      this.debugOverlay = this.createDebugOverlay();
     }
-    this.sceneManager.setScene(scene);
-
-    this.debugOverlay = this.createDebugOverlay();
     window.addEventListener('keydown', this.onKeyDown);
   }
 
@@ -47,7 +58,7 @@ export class Engine {
   stop(): void {
     cancelAnimationFrame(this.animationId);
     window.removeEventListener('keydown', this.onKeyDown);
-    this.debugOverlay.remove();
+    this.debugOverlay?.remove();
   }
 
   private loop(): void {
@@ -91,6 +102,10 @@ export class Engine {
   }
 
   private updateDebugOverlay(): void {
+    if (!this.debugOverlay) {
+      return;
+    }
+
     const cam = this.cameraController.camera.position;
     this.debugOverlay.textContent =
       `FPS: ${this.fpsSmoothed.toFixed(1)}\n` +
@@ -98,21 +113,65 @@ export class Engine {
       `Camera: ${cam.x.toFixed(2)}, ${cam.y.toFixed(2)}, ${cam.z.toFixed(2)}`;
   }
 
-  private createInitialScene(): BaseScene {
+  getCurrentSphereId(): SphereId {
+    return this.currentSphereId;
+  }
+
+  setSphere(sphereId: SphereId): void {
+    this.stopTourOrbit();
+
+    if (this.currentSphereId === sphereId) {
+      return;
+    }
+
+    this.currentSphereId = sphereId;
+    this.applyScene(this.createScene(sphereId));
+  }
+
+  private resolveInitialSphereId(): SphereId {
     const sceneName = new URLSearchParams(window.location.search).get('scene');
+
     if (sceneName === 'quasar') {
-      return new QuasarScene();
+      return 'quasar';
     }
     if (sceneName === 'pulsar') {
-      return new PulsarScene();
+      return 'pulsar';
     }
     if (sceneName === 'kerr') {
-      return new KerrBlackHoleScene();
+      return 'kerr-black-hole';
     }
-    if (sceneName === 'neutron_star' || sceneName === 'neutron-star') {
-      return new NeutronStarScene();
+    if (sceneName === 'neutron' || sceneName === 'neutron-star') {
+      return 'neutron-star';
     }
-    return new BlackHoleScene();
+    if (sceneName === 'black-hole') {
+      return 'black-hole';
+    }
+
+    return 'black-hole';
+  }
+
+  private createScene(sphereId: SphereId): BaseScene {
+    switch (sphereId) {
+      case 'quasar':
+        return new QuasarScene();
+      case 'kerr-black-hole':
+        return new KerrBlackHoleScene();
+      case 'pulsar':
+        return new PulsarScene();
+      case 'neutron-star':
+        return new NeutronStarScene();
+      case 'black-hole':
+      default:
+        return new BlackHoleScene();
+    }
+  }
+
+  private applyScene(scene: BaseScene): void {
+    if ('linkCamera' in scene && typeof scene.linkCamera === 'function') {
+      scene.linkCamera(this.cameraController.camera);
+    }
+
+    this.sceneManager.setScene(scene);
   }
 
   private onKeyDown = (event: KeyboardEvent): void => {
@@ -138,15 +197,10 @@ export class Engine {
       window.open(url, '_blank');
     }
   };
-
-  playFreeModeIntro(onComplete?: () => void): void {
-    this.cameraController.animateTo(
-      new THREE.Vector3(-8, 16, 34),
-      new THREE.Vector3(0, 0, 0),
-      2000,
-      onComplete,
-      4
-    );
+  playFreeModeIntro(preset: CameraPreset, onComplete?: () => void): void {
+    this.stopTourOrbit();
+    this.unlockCameraControls();
+    this.animateCameraTo(preset, onComplete);
   }
 
   lockCameraControls(): void {
@@ -184,5 +238,14 @@ export class Engine {
   stopTourOrbit(): void {
     this.cameraController.stopAutoOrbit();
   }
-}
 
+  private animateCameraTo(preset: CameraPreset, onComplete?: () => void): void {
+    this.cameraController.animateTo(
+      new THREE.Vector3(preset.position.x, preset.position.y, preset.position.z),
+      new THREE.Vector3(preset.target.x, preset.target.y, preset.target.z),
+      preset.durationMs ?? 2000,
+      onComplete,
+      preset.arcHeight ?? 0
+    );
+  }
+}

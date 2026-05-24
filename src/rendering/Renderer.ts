@@ -27,6 +27,7 @@ export class Renderer {
   }
 
   initPostProcessing(camera: THREE.Camera, options?: PostProcessingOptions): void {
+    this.postFX?.dispose();
     this.postFX = new PostProcessingManager(this.webGLRenderer, this.scene, camera, options);
   }
 
