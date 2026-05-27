@@ -167,13 +167,39 @@ export function createNeutronStarObjects(model: NeutronStarModel): NeutronStarOb
   starsGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   starsGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-  const starsMaterial = new THREE.PointsMaterial({
-    size: 0.45,
-    sizeAttenuation: true,
+  const starsMaterial = new THREE.ShaderMaterial({
     transparent: true,
-    opacity: 0.85,
-    vertexColors: true,
     depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    vertexColors: true,
+    vertexShader: `
+      varying vec3 vColor;
+
+      void main() {
+        vColor = color;
+
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+
+        gl_PointSize = 1.8 * (120.0 / -mvPosition.z);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+
+      void main() {
+        float d = length(gl_PointCoord - vec2(0.5));
+
+        float core = smoothstep(0.45, 0.0, d);
+        float halo = smoothstep(0.5, 0.0, d) * 0.35;
+
+        float alpha = core + halo;
+
+        if (d > 0.5) discard;
+
+        gl_FragColor = vec4(vColor, alpha * 0.9);
+      }
+    `,
   });
 
   const stars = new THREE.Points(starsGeometry, starsMaterial);
