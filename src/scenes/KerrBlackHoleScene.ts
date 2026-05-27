@@ -28,12 +28,12 @@ export class KerrBlackHoleScene extends BaseScene {
             isco: this.blackHole.iscoRadius,
             rs: this.blackHole.eventHorizon,
             diskInner: this.blackHole.iscoRadius * 1.01,
-            diskOuter: this.blackHole.iscoRadius * 4.9,
-            diskH0: 0.050,
-            diskFlare: 0.14,
-            diskOpacity: 0.72,
-            diskVolSteps: 14.0,
-            tempScale: 0.62,
+            diskOuter: this.blackHole.iscoRadius * 4.6,
+            diskH0: 0.042,
+            diskFlare: 0.12,
+            diskOpacity: 0.66,
+            diskVolSteps: 12.0,
+            tempScale: 0.60,
         });
 
         const geo = new THREE.PlaneGeometry(2, 2);
